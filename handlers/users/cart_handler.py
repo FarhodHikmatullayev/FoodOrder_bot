@@ -1,4 +1,8 @@
+import asyncio
+from typing import Union
+
 from aiogram import types
+from aiogram.dispatcher import filters
 from aiogram.types import CallbackQuery, Message
 
 from handlers.users.menu_handlers import show_item
@@ -29,30 +33,42 @@ async def exact_item_and_count(call: CallbackQuery, callback_data: dict):
         items = await db.get_user_orders(user_id=user['id'], item_id=item_id, is_ordered=False)
         if not items:
             cart_item = await db.add_to_cart(int(user['id']), int(item_id), count_item)
+            msg = await call.message.answer(text="Mahsulot savatga qo'shildi")
+        else:
+            msg = await call.message.answer(text="Ushbu mahsulot savatda mavjud")
+        await asyncio.sleep(5)
+        await msg.delete()
 
 
-# @dp.callback_query_handler(edit_cart.filter())
-# async def cart(call: CallbackQuery, callback_data: dict):
-#     user = await db.select_user(telegram_id=call.from_user.id)
-#     user_id = user['id']
-#     markup = cart_keyboard(user_id)
-#     print(markup)
-#     await call.message.edit_reply_markup(reply_markup=markup)
-
+@dp.message_handler(filters.Command('cart'))
 @dp.callback_query_handler(text='open_cart')
-async def open_cart(call: CallbackQuery):
-    user = await db.select_user(telegram_id=call.from_user.id)
-    user_id = user['id']
-    items = await db.get_user_orders(user_id=user_id, is_ordered=False)
-    if items:
-        markup = await cart_keyboard(user_id)
-        await call.message.edit_text(text="Sizning savatingizdagi mahsulotlar:", reply_markup=markup)
-    else:
-        markup = await categories_keyboard()
-        await call.message.edit_text(
-            text="Sizning savatchangizda mahsulot mavjud emas, "
-                 "\n Savatga mahsulot qo'shish uchun quyidagi mahsulotlardan tanlang: ",
-            reply_markup=markup)
+async def open_cart(message: Union[CallbackQuery, Message]):
+    user = await db.select_user(telegram_id=message.from_user.id)
+    if isinstance(message, CallbackQuery):
+        call = message
+        user_id = user['id']
+        items = await db.get_user_orders(user_id=user_id, is_ordered=False)
+        if items:
+            markup = await cart_keyboard(user_id)
+            await call.message.edit_text(text="🛒 Sizning savatingizdagi mahsulotlar:", reply_markup=markup)
+        else:
+            markup = await categories_keyboard()
+            msg = await call.message.edit_text(
+                text="🛒 Sizning savatchangizda mahsulot mavjud emas, "
+                     "\n ✅ Savatga mahsulot qo'shish uchun quyidagi mahsulotlardan tanlang: ",
+                reply_markup=markup)
+    elif isinstance(message, Message):
+        user_id = user['id']
+        items = await db.get_user_orders(user_id=user_id, is_ordered=False)
+        if items:
+            markup = await cart_keyboard(user_id)
+            await message.answer(text="🛒 Sizning savatingizdagi mahsulotlar:", reply_markup=markup)
+        else:
+            markup = await categories_keyboard()
+            msg = await message.answer(
+                text="🛒 Sizning savatchangizda mahsulot mavjud emas, "
+                     "\n ✅ Savatga mahsulot qo'shish uchun quyidagi mahsulotlardan tanlang: ",
+                reply_markup=markup)
 
 
 @dp.callback_query_handler(edit_cart.filter())

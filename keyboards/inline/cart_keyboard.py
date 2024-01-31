@@ -19,7 +19,7 @@ async def cart_keyboard(user_id):
 
         markap.insert(
             InlineKeyboardButton(
-                text=f"{item_name}", callback_data="ni"
+                text=f"{item_name}", callback_data="item_name"
             )
         )
         markap.row(
@@ -29,7 +29,7 @@ async def cart_keyboard(user_id):
         )
         markap.insert(
             InlineKeyboardButton(
-                text=f"{quantity}", callback_data='nimadirgadir'
+                text=f"{quantity}", callback_data='quantity'
             )
         )
         markap.insert(

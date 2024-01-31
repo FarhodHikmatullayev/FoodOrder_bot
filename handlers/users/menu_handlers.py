@@ -1,5 +1,5 @@
 from typing import Union
-
+from aiogram.dispatcher import filters
 from aiogram import types
 from aiogram.types import CallbackQuery, Message
 
@@ -9,14 +9,24 @@ from keyboards.inline.menu_keyboard import menu_callback_data, subcategories_key
 from loader import dp, db
 
 
+@dp.message_handler(filters.Command('menu'))
+@dp.message_handler(filters.Text(equals=("◀ Bosh menyu")))
 @dp.callback_query_handler(text="menu")
-async def menu(callback: CallbackQuery):
-    await list_categories(callback)
+async def menu(message: Union[CallbackQuery, Message]):
+    if isinstance(message, CallbackQuery):
+        callback = message
+        await list_categories(callback)
+    elif isinstance(message, Message):
+        await list_categories(message)
 
 
-async def list_categories(callback: CallbackQuery, **kwargs):
+async def list_categories(message: Union[CallbackQuery, Message], **kwargs):
     markup = await categories_keyboard()
-    await callback.message.edit_text(text="Categoriyalardan birini tanlang:", reply_markup=markup)
+    if isinstance(message, CallbackQuery):
+        call = message
+        await call.message.edit_text(text="Categoriyalardan birini tanlang:", reply_markup=markup)
+    elif isinstance(message, Message):
+        await message.answer(text="Categoriyalardan birini tanlang:", reply_markup=markup)
 
 
 async def list_subcategories(callback: CallbackQuery, category, **kwargs):

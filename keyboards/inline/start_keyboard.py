@@ -12,7 +12,7 @@ menu = InlineKeyboardMarkup(
             InlineKeyboardButton(text="🗒 Mening buyurtmalarim", callback_data='my_orders'),
         ],
         [
-            InlineKeyboardButton(text="🛒 Savatcha", callback_data='cart'),
+            InlineKeyboardButton(text="🛒 Savatcha", callback_data='open_cart'),
             InlineKeyboardButton(text="🤝 Support", callback_data='support')
         ],
 

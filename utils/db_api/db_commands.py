@@ -186,3 +186,13 @@ class Database:
                 RETURNING *
                """
         return await self.execute(sql, price, order_id, fetchrow=True)
+
+    async def get_order(self, **kwargs):
+        sql = 'SELECT * FROM "order" WHERE '
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetch=True)
+
+    async def get_order_carts(self, **kwargs):
+        sql = 'SELECT * FROM "order_carts" WHERE '
+        sql, parameters = self.format_args(sql, parameters=kwargs)
+        return await self.execute(sql, *parameters, fetch=True)
